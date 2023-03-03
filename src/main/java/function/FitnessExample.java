@@ -46,4 +46,4 @@ public class FitnessExample {
         pageData.setContent(buffer.toString());
         return pageData.getHtml();
     }
-}
+} 
