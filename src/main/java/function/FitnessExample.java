@@ -7,32 +7,35 @@ public class FitnessExample {
 
     public static final String INCLUDE_TEARDOWN = "!include -teardown .";
     public static final String INCLUDE_SETUP = "!include -setup .";
+    public static final String TEST = "Test";
+    public static final String SET_UP = "SetUp";
+    public static final String TEAR_DOWN = "TearDown";
 
     public String testableHtml(PageData pageData, boolean includeSuiteSetup) throws Exception {
         WikiPage wikiPage = pageData.getWikiPage();
         StringBuffer buffer = new StringBuffer();
 
-        if (pageData.hasAttribute("Test")) {
+        if (pageData.hasAttribute(TEST)) {
             if (includeSuiteSetup) {
-                WikiPage suiteSetup = PageCrawlerImpl.getInheritedPage(SuiteResponder.SUITE_SETUP_NAME, wikiPage);
-                extractedIncludeTeardown(buffer, extracted(wikiPage, suiteSetup));
+                extractedIncludeTeardown(buffer, extracted(wikiPage, getWikiPage(wikiPage, SuiteResponder.SUITE_SETUP_NAME)));
             }
-            WikiPage setup = PageCrawlerImpl.getInheritedPage("SetUp", wikiPage);
-            extractedIncludeTeardown(buffer, extracted(wikiPage, setup));
+            extractedIncludeTeardown(buffer, extracted(wikiPage, getWikiPage(wikiPage, SET_UP)));
         }
 
         buffer.append(pageData.getContent());
-        if (pageData.hasAttribute("Test")) {
-            WikiPage teardown = PageCrawlerImpl.getInheritedPage("TearDown", wikiPage);
-            extractedIncludeSetup(buffer, extracted(wikiPage, teardown));
+        if (pageData.hasAttribute(TEST)) {
+            extractedIncludeSetup(buffer, extracted(wikiPage, getWikiPage(wikiPage, TEAR_DOWN)));
             if (includeSuiteSetup) {
-                WikiPage suiteTeardown = PageCrawlerImpl.getInheritedPage(SuiteResponder.SUITE_TEARDOWN_NAME, wikiPage);
-                extractedIncludeSetup(buffer, extracted(wikiPage, suiteTeardown));
+                extractedIncludeSetup(buffer, extracted(wikiPage, getWikiPage(wikiPage, SuiteResponder.SUITE_TEARDOWN_NAME)));
             }
         }
 
         pageData.setContent(buffer.toString());
         return pageData.getHtml();
+    }
+
+    private static WikiPage getWikiPage(WikiPage wikiPage, String suiteResponder) throws Exception {
+        return PageCrawlerImpl.getInheritedPage(suiteResponder, wikiPage);
     }
 
     private static String extracted(WikiPage wikiPage, WikiPage includeTypeWikiPage) throws Exception {
