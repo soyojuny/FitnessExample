@@ -10,23 +10,23 @@ public class FitnessExample {
     public static final String TEST = "Test";
     public static final String SET_UP = "SetUp";
     public static final String TEAR_DOWN = "TearDown";
+    public static final StringBuffer buffer = new StringBuffer();
 
     public String testableHtml(PageData pageData, boolean includeSuiteSetup) throws Exception {
         WikiPage wikiPage = pageData.getWikiPage();
-        StringBuffer buffer = new StringBuffer();
 
         if (pageData.hasAttribute(TEST)) {
             if (includeSuiteSetup) {
-                extractedIncludeTeardown(buffer, extracted(wikiPage, getWikiPage(wikiPage, SuiteResponder.SUITE_SETUP_NAME)));
+                writeBuffered(extracted(wikiPage, getWikiPage(wikiPage, SuiteResponder.SUITE_SETUP_NAME)), INCLUDE_TEARDOWN);
             }
-            extractedIncludeTeardown(buffer, extracted(wikiPage, getWikiPage(wikiPage, SET_UP)));
+            writeBuffered(extracted(wikiPage, getWikiPage(wikiPage, SET_UP)), INCLUDE_TEARDOWN);
         }
 
         buffer.append(pageData.getContent());
         if (pageData.hasAttribute(TEST)) {
-            extractedIncludeSetup(buffer, extracted(wikiPage, getWikiPage(wikiPage, TEAR_DOWN)));
+            writeBuffered(extracted(wikiPage, getWikiPage(wikiPage, TEAR_DOWN)), INCLUDE_SETUP);
             if (includeSuiteSetup) {
-                extractedIncludeSetup(buffer, extracted(wikiPage, getWikiPage(wikiPage, SuiteResponder.SUITE_TEARDOWN_NAME)));
+                writeBuffered(extracted(wikiPage, getWikiPage(wikiPage, SuiteResponder.SUITE_TEARDOWN_NAME)), INCLUDE_SETUP);
             }
         }
 
@@ -46,12 +46,8 @@ public class FitnessExample {
         return getPathName(wikiPagePath);
     }
 
-    private static void extractedIncludeTeardown(StringBuffer buffer, String tearDownPathName) {
-        buffer.append(INCLUDE_TEARDOWN).append(tearDownPathName).append("\n");
-    }
-
-    private static void extractedIncludeSetup(StringBuffer buffer, String pagePathName) {
-        buffer.append(INCLUDE_SETUP).append(pagePathName).append("\n");
+    private static void writeBuffered(String tearDownPathName, String type) {
+        buffer.append(type).append(tearDownPathName).append("\n");
     }
 
     private static String getPathName(WikiPagePath pagePath) {
