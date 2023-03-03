@@ -15,19 +15,19 @@ public class FitnessExample {
         if (pageData.hasAttribute("Test")) {
             if (includeSuiteSetup) {
                 WikiPage suiteSetup = PageCrawlerImpl.getInheritedPage(SuiteResponder.SUITE_SETUP_NAME, wikiPage);
-                extracted(wikiPage, buffer, suiteSetup);
+                extractedIncludeTeardown(buffer, extracted(wikiPage, suiteSetup));
             }
             WikiPage setup = PageCrawlerImpl.getInheritedPage("SetUp", wikiPage);
-            extracted(wikiPage, buffer, setup);
+            extractedIncludeTeardown(buffer, extracted(wikiPage, setup));
         }
 
         buffer.append(pageData.getContent());
         if (pageData.hasAttribute("Test")) {
             WikiPage teardown = PageCrawlerImpl.getInheritedPage("TearDown", wikiPage);
-            extracted(wikiPage, buffer, teardown);
+            extractedIncludeSetup(buffer, extracted(wikiPage, teardown));
             if (includeSuiteSetup) {
                 WikiPage suiteTeardown = PageCrawlerImpl.getInheritedPage(SuiteResponder.SUITE_TEARDOWN_NAME, wikiPage);
-                extracted(wikiPage, buffer, suiteTeardown);
+                extractedIncludeSetup(buffer, extracted(wikiPage, suiteTeardown));
             }
         }
 
@@ -35,12 +35,12 @@ public class FitnessExample {
         return pageData.getHtml();
     }
 
-    private static void extracted(WikiPage wikiPage, StringBuffer buffer, WikiPage pageType) throws Exception {
-        if (pageType != null) {
-            WikiPagePath tearDownPath = getWikiPagePath(wikiPage, pageType);
-            String tearDownPathName = getPathName(tearDownPath);
-            extractedIncludeTeardown(buffer, tearDownPathName);
+    private static String extracted(WikiPage wikiPage, WikiPage includeTypeWikiPage) throws Exception {
+        WikiPagePath wikiPagePath = null;
+        if (includeTypeWikiPage != null) {
+            wikiPagePath = getWikiPagePath(wikiPage, includeTypeWikiPage);
         }
+        return getPathName(wikiPagePath);
     }
 
     private static void extractedIncludeTeardown(StringBuffer buffer, String tearDownPathName) {
